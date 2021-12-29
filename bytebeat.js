@@ -248,7 +248,9 @@ const bytebeat = new class {
 			if(el.tagName === 'CODE') {
 				this.loadCode(Object.assign({ code: el.innerText },
 					el.hasAttribute('data-songdata') ? JSON.parse(el.dataset.songdata) : {}));
-			} else if(el.classList.contains('code-load')) {
+			} else if(el.classList.contains('code-load-formatted') ||
+				el.classList.contains('code-load-original-formatted')
+			) {
 				const xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = () => {
 					if(xhr.readyState === 4 && xhr.status === 200) {
@@ -256,9 +258,18 @@ const bytebeat = new class {
 							{ code: xhr.responseText }));
 					}
 				};
-				xhr.open('GET', 'library/' + el.dataset.codeFile, true);
+				xhr.open('GET', `library_${ el.classList.contains('code-load-formatted') ?
+					'formatted' : 'originals' }/${ el.dataset.codeFormatted }`, true);
 				xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 				xhr.send(null);
+			} else if(el.classList.contains('code-toggle-original')) {
+				const parentEl = el.parentNode;
+				parentEl.classList.toggle('disabled');
+				parentEl.previousElementSibling.classList.toggle('disabled');
+			} else if(el.classList.contains('code-toggle-minimized')) {
+				const parentEl = el.parentNode;
+				parentEl.classList.toggle('disabled');
+				parentEl.nextElementSibling.classList.toggle('disabled');
 			}
 		};
 		libraryElem.onmouseover = function(e) {
